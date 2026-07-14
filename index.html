@@ -105,40 +105,26 @@
 
   <script>
     // Edit this list to add / remove apps.
+    // All repos are private on github.com/devmichaelmorton — cards link to the repo.
+    const gh = (r) => "https://github.com/devmichaelmorton/" + r;
     const apps = [
-      {
-        name: "PEG Ratio Calculator",
-        desc: "Estimate whether a stock's growth justifies its P/E.",
-        icon: "📈",
-        url: "https://devmichaelmorton.github.io/peg-ratio-calculator/",
-        repo: "https://github.com/devmichaelmorton/peg-ratio-calculator",
-        live: true
-      },
-      {
-        name: "Contractor Calculator",
-        desc: "Compare W-2 vs. contractor take-home pay.",
-        icon: "🧮",
-        url: "https://devmichaelmorton.github.io/contractor-calculator/",
-        repo: "https://github.com/devmichaelmorton/contractor-calculator",
-        live: true
-      },
-      {
-        name: "Recipe Manager",
-        desc: "Save and organize recipes. (Private repo)",
-        icon: "🍳",
-        url: "https://github.com/devmichaelmorton/recipe-manager",
-        repo: "https://github.com/devmichaelmorton/recipe-manager",
-        live: false
-      },
-      {
-        name: "Flecks Trading Dashboard",
-        desc: "Trading dashboard project. (Private repo)",
-        icon: "💹",
-        url: "https://github.com/devmichaelmorton/flecks-trading-dashboard",
-        repo: "https://github.com/devmichaelmorton/flecks-trading-dashboard",
-        live: false
-      }
-    ];
+      { name: "AnnoTag",              icon: "🏷️", repo: gh("annotag"),               desc: "Tag any web page and re-find your notes — Chrome extension + annotag.io + accounts API." },
+      { name: "Atelier",              icon: "✍️", repo: gh("atelier"),               desc: "Distraction-free novel-writing app — scenes, chapters, and worldbuilding." },
+      { name: "blueForge",            icon: "🔷", repo: gh("blueForge"),             desc: "Tailwind-built landing / marketing site." },
+      { name: "Compass",              icon: "🧭", repo: gh("compass"),               desc: "Master productivity app organized by Who / What / Where / When / Why / How." },
+      { name: "Contractor Calculator",icon: "🧮", repo: gh("contractor-calculator"), desc: "Compare W-2 vs. contractor take-home pay." },
+      { name: "emagic",               icon: "✨", repo: gh("emagic"),                desc: "Emagic marketing site." },
+      { name: "Expense Manager",      icon: "💵", repo: gh("expense-manager"),       desc: "Spreadsheet-style expense tracker split by business entity." },
+      { name: "Flecks Capital",       icon: "💹", repo: gh("flecks-capital"),        desc: "Gap-trading research & strategy dashboard." },
+      { name: "Gap Bot",              icon: "🤖", repo: gh("gap-bot"),               desc: "Python engine researching the gap-fill options edge on SPY / QQQ." },
+      { name: "GigaHuman",            icon: "🌱", repo: gh("gigahuman"),             desc: "Life-inventory app scoring every area of your life 1–10." },
+      { name: "MBA Library",          icon: "🎓", repo: gh("mba-library"),           desc: "Personal reference library of MBA frameworks, organized by class." },
+      { name: "Mortonomics",          icon: "📊", repo: gh("mortonomics"),           desc: "Mortonomics — personal site." },
+      { name: "PEG Ratio Comparison", icon: "📈", repo: gh("peg-ratio-calculator"),  desc: "Compare whether stocks' growth justifies their P/E." },
+      { name: "Recipe Manager",       icon: "🍳", repo: gh("recipe-manager"),        desc: "Save and organize recipes, seeded from a Notion export." },
+      { name: "Scripture Study",      icon: "📖", repo: gh("scripture-study"),       desc: "Scripture study + worldbuilder for the Standard Works." },
+      { name: "Utah Characters",      icon: "🎭", repo: gh("utahcharacters"),        desc: "Utah Characters — site with a PHP contact form." },
+    ].map(a => ({ ...a, url: a.repo, live: false }));
 
     const grid = document.getElementById("grid");
     for (const app of apps) {
