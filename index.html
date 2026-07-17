@@ -6,95 +6,136 @@
   <title>My Apps</title>
   <style>
     :root {
-      --bg: #0b0f17;
-      --bg-grad-1: #131a29;
-      --card: #161c2b;
-      --card-hover: #1d2740;
+      --bg: #0a0e16;
+      --bg-grad-1: #141c2e;
+      --card: #151b29;
+      --card-hover: #1b2438;
       --border: #262f45;
       --text: #e7ecf5;
       --muted: #8a95ab;
+      --faint: #5b6478;
       --accent: #6ea8fe;
       --accent-soft: rgba(110, 168, 254, 0.14);
       --ok: #4ade80;
-      --ok-soft: rgba(74, 222, 128, 0.14);
+      --ok-soft: rgba(74, 222, 128, 0.13);
+      --amber: #fbbf24;
     }
     * { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: radial-gradient(1200px 600px at 50% -10%, var(--bg-grad-1), var(--bg)) fixed;
+      background:
+        radial-gradient(900px 500px at 12% -8%, rgba(110,168,254,0.10), transparent 60%),
+        radial-gradient(900px 500px at 100% 0%, rgba(74,222,128,0.07), transparent 55%),
+        radial-gradient(1200px 700px at 50% -10%, var(--bg-grad-1), var(--bg)) fixed;
       color: var(--text);
       min-height: 100vh;
       -webkit-font-smoothing: antialiased;
     }
-    .wrap { max-width: 960px; margin: 0 auto; padding: 56px 24px 80px; }
-    header { margin-bottom: 36px; }
-    h1 { font-size: 30px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 6px; }
-    .subtitle { color: var(--muted); font-size: 15px; margin: 0; }
+    .wrap { max-width: 1000px; margin: 0 auto; padding: 56px 24px 90px; }
+
+    header { margin-bottom: 40px; }
+    h1 { font-size: 32px; font-weight: 750; letter-spacing: -0.025em; margin: 0 0 8px; }
+    .subtitle { color: var(--muted); font-size: 15px; margin: 0 0 18px; }
+    .stats { display: flex; gap: 18px; font-size: 13px; color: var(--muted); }
+    .stats b { color: var(--text); font-weight: 650; }
+    .stats .pip {
+      display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+      background: var(--ok); margin-right: 6px; vertical-align: middle;
+      box-shadow: 0 0 0 0 rgba(74,222,128,0.6); animation: pulse 2.4s infinite;
+    }
+    @keyframes pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(74,222,128,0.55); }
+      70%  { box-shadow: 0 0 0 7px rgba(74,222,128,0); }
+      100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); }
+    }
+
+    /* sections */
+    .section { margin-bottom: 42px; }
+    .section-head {
+      display: flex; align-items: center; gap: 10px;
+      margin: 0 0 18px; padding-bottom: 11px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-head .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+    .section-head h2 {
+      font-size: 12.5px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.09em; margin: 0; color: var(--text);
+    }
+    .section-head .count {
+      font-size: 12px; color: var(--faint); font-weight: 600;
+      background: rgba(255,255,255,0.04); padding: 1px 8px; border-radius: 999px;
+    }
+    .section-head .hint { margin-left: auto; font-size: 12px; color: var(--faint); }
+
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       gap: 16px;
     }
+
+    /* cards */
     .card {
       position: relative;
-      display: flex;
-      flex-direction: column;
+      display: flex; flex-direction: column;
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 16px;
       padding: 20px;
-      text-decoration: none;
-      color: inherit;
-      transition: transform 0.14s ease, background 0.14s ease, border-color 0.14s ease;
+      text-decoration: none; color: inherit;
+      transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
       overflow: hidden;
     }
-    .card:hover {
-      background: var(--card-hover);
-      border-color: var(--accent);
-      transform: translateY(-3px);
+    .card::before {
+      content: ""; position: absolute; inset: 0 0 auto 0; height: 2px;
+      background: transparent; transition: background 0.15s ease;
     }
+    .card:hover { background: var(--card-hover); transform: translateY(-3px); }
+    .card:not(.live):hover { border-color: var(--accent); }
+    .card:not(.live):hover::before { background: linear-gradient(90deg, transparent, var(--accent), transparent); }
+
+    /* live cards get a persistent green identity */
+    .card.live { border-color: rgba(74,222,128,0.28); }
+    .card.live::before { background: linear-gradient(90deg, transparent, rgba(74,222,128,0.7), transparent); }
+    .card.live:hover { border-color: var(--ok); box-shadow: 0 8px 30px -12px rgba(74,222,128,0.35); }
+
     .icon {
-      width: 44px; height: 44px;
-      border-radius: 12px;
+      width: 46px; height: 46px; border-radius: 12px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 22px;
-      background: var(--accent-soft);
-      margin-bottom: 14px;
+      font-size: 23px; background: var(--accent-soft); margin-bottom: 14px;
     }
-    .card h2 { font-size: 17px; font-weight: 650; margin: 0 0 4px; letter-spacing: -0.01em; }
+    .card.live .icon { background: var(--ok-soft); }
+
+    .card h3 { font-size: 17px; font-weight: 650; margin: 0 0 4px; letter-spacing: -0.01em; }
     .card p { font-size: 13.5px; color: var(--muted); margin: 0; line-height: 1.45; flex: 1; }
-    .meta {
-      display: flex; align-items: center; gap: 8px;
-      margin-top: 16px;
-    }
+
+    .meta { display: flex; align-items: center; gap: 8px; margin-top: 16px; }
     .badge {
-      font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
-      padding: 3px 8px; border-radius: 999px;
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 650; letter-spacing: 0.02em;
+      padding: 3px 9px; border-radius: 999px;
     }
     .badge.live { background: var(--ok-soft); color: var(--ok); }
-    .badge.repo { background: var(--accent-soft); color: var(--accent); }
-    .arrow { margin-left: auto; color: var(--muted); font-size: 18px; transition: transform 0.14s ease, color 0.14s ease; }
-    .card:hover .arrow { transform: translateX(3px); color: var(--accent); }
+    .badge.repo { background: rgba(255,255,255,0.05); color: var(--muted); }
+    .badge .live-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--ok);
+      box-shadow: 0 0 0 0 rgba(74,222,128,0.6); animation: pulse 2.4s infinite;
+    }
+    .arrow { margin-left: auto; color: var(--faint); font-size: 18px; transition: transform 0.15s ease, color 0.15s ease; }
+    .card:hover .arrow { transform: translateX(3px); }
+    .card.live:hover .arrow { color: var(--ok); }
+    .card:not(.live):hover .arrow { color: var(--accent); }
+
     .repolink {
-      position: absolute; top: 16px; right: 16px;
-      font-size: 12px; color: var(--muted);
-      text-decoration: none; z-index: 2;
-      padding: 4px 6px; border-radius: 8px;
-      opacity: 0; transition: opacity 0.14s ease, background 0.14s ease;
+      position: absolute; top: 15px; right: 15px;
+      font-size: 11.5px; color: var(--faint); text-decoration: none; z-index: 2;
+      padding: 4px 7px; border-radius: 8px;
+      opacity: 0; transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
     }
     .card:hover .repolink { opacity: 1; }
-    .repolink:hover { background: rgba(255,255,255,0.06); color: var(--text); }
-    .section { margin-bottom: 40px; }
-    .section-title {
-      display: flex; align-items: baseline; gap: 10px;
-      font-size: 13px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 0.08em; color: var(--muted);
-      margin: 0 0 16px; padding-bottom: 10px;
-      border-bottom: 1px solid var(--border);
-    }
-    .section-title .count { font-weight: 500; letter-spacing: 0; text-transform: none; opacity: 0.7; }
-    footer { margin-top: 44px; color: var(--muted); font-size: 12.5px; }
+    .repolink:hover { background: rgba(255,255,255,0.07); color: var(--text); }
+
+    footer { margin-top: 50px; color: var(--faint); font-size: 12.5px; }
     footer a { color: var(--muted); }
   </style>
 </head>
@@ -103,9 +144,13 @@
     <header>
       <h1>My Apps</h1>
       <p class="subtitle">Quick launcher for my projects.</p>
+      <div class="stats">
+        <span><span class="pip"></span><b id="liveCount">0</b> live</span>
+        <span><b id="totalCount">0</b> total</span>
+      </div>
     </header>
 
-    <div class="grid" id="grid"></div>
+    <div id="sections"></div>
 
     <footer>
       Hosted on GitHub Pages · <a href="https://github.com/devmichaelmorton" target="_blank" rel="noopener">github.com/devmichaelmorton</a>
@@ -113,48 +158,81 @@
   </div>
 
   <script>
-    // Edit this list to add / remove apps.
-    // Repos are private on github.com/devmichaelmorton.
-    // Add `site:` when an app is deployed & public — the card then opens the live app
-    // and shows a green check. Without `site`, the card opens the GitHub repo.
+    // ── Edit this list to add / remove apps ─────────────────────────────
+    // repo  : GitHub source (private)
+    // site  : public URL of the deployed app. Add this when it goes live —
+    //         the card then opens the app, moves to the "Live" section,
+    //         and shows a green ✓ Live badge.
+    // type  : "static" (plain webpage) · "webapp" (needs a server/DB) · "script"
     const gh = (r) => "https://github.com/devmichaelmorton/" + r;
     const apps = [
-      { name: "AnnoTag",              icon: "🏷️", repo: gh("annotag"),               site: "https://annotag.io",                          desc: "Tag any web page and re-find your notes — Chrome extension + annotag.io + accounts API." },
-      { name: "Atelier",              icon: "✍️", repo: gh("atelier"),                                                                    desc: "Distraction-free novel-writing app — scenes, chapters, and worldbuilding." },
-      { name: "blueForge",            icon: "🔷", repo: gh("blueForge"),             site: "https://blue-forge-sepia.vercel.app",         desc: "Tailwind-built landing / marketing site." },
-      { name: "Compass",              icon: "🧭", repo: gh("compass"),                                                                    desc: "Master productivity app organized by Who / What / Where / When / Why / How." },
-      { name: "Contractor Calculator",icon: "🧮", repo: gh("contractor-calculator"), site: "https://contractor-calculator-gamma.vercel.app", desc: "Compare W-2 vs. contractor take-home pay." },
-      { name: "emagic",               icon: "✨", repo: gh("emagic"),                                                                     desc: "Emagic marketing site." },
-      { name: "Expense Manager",      icon: "💵", repo: gh("expense-manager"),       desc: "Spreadsheet-style expense tracker split by business entity." },
-      { name: "Flecks Capital",       icon: "💹", repo: gh("flecks-capital"),        desc: "Gap-trading research & strategy dashboard." },
-      { name: "Gap Bot",              icon: "🤖", repo: gh("gap-bot"),               desc: "Python engine researching the gap-fill options edge on SPY / QQQ." },
-      { name: "GigaHuman",            icon: "🌱", repo: gh("gigahuman"),             desc: "Life-inventory app scoring every area of your life 1–10." },
-      { name: "MBA Library",          icon: "🎓", repo: gh("mba-library"),           desc: "Personal reference library of MBA frameworks, organized by class." },
-      { name: "Mortonomics",          icon: "📊", repo: gh("mortonomics"),           site: "https://mortonomics.vercel.app",              desc: "Mortonomics — personal site." },
-      { name: "PEG Ratio Comparison", icon: "📈", repo: gh("peg-ratio-calculator"),  site: "https://peg-ratio-calculator-phi.vercel.app", desc: "Compare whether stocks' growth justifies their P/E." },
-      { name: "Recipe Manager",       icon: "🍳", repo: gh("recipe-manager"),        desc: "Save and organize recipes, seeded from a Notion export." },
-      { name: "Scripture Study",      icon: "📖", repo: gh("scripture-study"),       desc: "Scripture study + worldbuilder for the Standard Works." },
-      { name: "Utah Characters",      icon: "🎭", repo: gh("utahcharacters"),        desc: "Utah Characters — site with a PHP contact form." },
+      { name: "AnnoTag",              icon: "🏷️", type: "webapp", repo: gh("annotag"),               site: "https://annotag.io",                              desc: "Tag any web page and re-find your notes — extension + annotag.io + accounts API." },
+      { name: "Atelier",              icon: "✍️", type: "webapp", repo: gh("atelier"),                                                                        desc: "Distraction-free novel-writing app — scenes, chapters, and worldbuilding." },
+      { name: "blueForge",            icon: "🔷", type: "static", repo: gh("blueForge"),             site: "https://blue-forge-sepia.vercel.app",             desc: "Tailwind-built landing / marketing site." },
+      { name: "Compass",              icon: "🧭", type: "static", repo: gh("compass"),                                                                        desc: "Master productivity app organized by Who / What / Where / When / Why / How." },
+      { name: "Contractor Calculator",icon: "🧮", type: "static", repo: gh("contractor-calculator"), site: "https://contractor-calculator-gamma.vercel.app",  desc: "Compare W-2 vs. contractor take-home pay." },
+      { name: "emagic",               icon: "✨", type: "static", repo: gh("emagic"),                                                                         desc: "Emagic marketing site (has a PHP contact form)." },
+      { name: "Expense Manager",      icon: "💵", type: "webapp", repo: gh("expense-manager"),                                                                desc: "Spreadsheet-style expense tracker split by business entity." },
+      { name: "Flecks Capital",       icon: "💹", type: "webapp", repo: gh("flecks-capital"),                                                                 desc: "Gap-trading research & strategy dashboard." },
+      { name: "Gap Bot",              icon: "🤖", type: "script", repo: gh("gap-bot"),                                                                        desc: "Python engine researching the gap-fill options edge on SPY / QQQ." },
+      { name: "GigaHuman",            icon: "🌱", type: "webapp", repo: gh("gigahuman"),                                                                      desc: "Life-inventory app scoring every area of your life 1–10." },
+      { name: "MBA Library",          icon: "🎓", type: "webapp", repo: gh("mba-library"),                                                                    desc: "Personal reference library of MBA frameworks, organized by class." },
+      { name: "Mortonomics",          icon: "📊", type: "static", repo: gh("mortonomics"),           site: "https://mortonomics.vercel.app",                  desc: "Mortonomics — personal site." },
+      { name: "PEG Ratio Comparison", icon: "📈", type: "static", repo: gh("peg-ratio-calculator"),  site: "https://peg-ratio-calculator-phi.vercel.app",     desc: "Compare whether stocks' growth justifies their P/E." },
+      { name: "Recipe Manager",       icon: "🍳", type: "webapp", repo: gh("recipe-manager"),                                                                 desc: "Save and organize recipes, seeded from a Notion export." },
+      { name: "Scripture Study",      icon: "📖", type: "webapp", repo: gh("scripture-study"),                                                                desc: "Scripture study + worldbuilder for the Standard Works." },
+      { name: "Utah Characters",      icon: "🎭", type: "static", repo: gh("utahcharacters"),                                                                 desc: "Utah Characters — site with a PHP contact form." },
     ].map(a => ({ ...a, url: a.site || a.repo, live: !!a.site }));
 
-    const grid = document.getElementById("grid");
-    for (const app of apps) {
-      const card = document.createElement("a");
-      card.className = "card";
-      card.href = app.url;
-      card.target = "_blank";
-      card.rel = "noopener";
-      card.innerHTML = `
-        ${app.live ? `<a class="repolink" href="${app.repo}" target="_blank" rel="noopener" title="View source">&lt;/&gt; code</a>` : ""}
-        <div class="icon">${app.icon}</div>
-        <h2>${app.name}</h2>
-        <p>${app.desc}</p>
-        <div class="meta">
-          <span class="badge ${app.live ? "live" : "repo"}">${app.live ? "✓ Live" : "GitHub"}</span>
-          <span class="arrow">&rarr;</span>
+    // ── Section layout ──────────────────────────────────────────────────
+    // Live apps float to the top (any type). The rest group by what they are.
+    const sections = [
+      { key: "live",   title: "Live",         color: "#4ade80", hint: "open these right now",          match: a => a.live },
+      { key: "static", title: "Static sites", color: "#6ea8fe", hint: "ready to deploy to Vercel",     match: a => !a.live && a.type === "static" },
+      { key: "webapp", title: "Web apps",     color: "#c084fc", hint: "need a server / database to host", match: a => !a.live && a.type === "webapp" },
+      { key: "script", title: "Scripts & engines", color: "#fbbf24", hint: "not a web app",            match: a => !a.live && a.type === "script" },
+    ];
+
+    const root = document.getElementById("sections");
+    document.getElementById("totalCount").textContent = apps.length;
+    document.getElementById("liveCount").textContent = apps.filter(a => a.live).length;
+
+    for (const sec of sections) {
+      const items = apps.filter(sec.match);
+      if (!items.length) continue;
+
+      const wrap = document.createElement("section");
+      wrap.className = "section";
+      wrap.innerHTML = `
+        <div class="section-head">
+          <span class="dot" style="background:${sec.color}"></span>
+          <h2>${sec.title}</h2>
+          <span class="count">${items.length}</span>
+          <span class="hint">${sec.hint}</span>
         </div>
+        <div class="grid"></div>
       `;
-      grid.appendChild(card);
+      const grid = wrap.querySelector(".grid");
+
+      for (const app of items) {
+        const card = document.createElement("a");
+        card.className = "card" + (app.live ? " live" : "");
+        card.href = app.url;
+        card.target = "_blank";
+        card.rel = "noopener";
+        card.innerHTML = `
+          ${app.live ? `<a class="repolink" href="${app.repo}" target="_blank" rel="noopener" title="View source">&lt;/&gt; code</a>` : ""}
+          <div class="icon">${app.icon}</div>
+          <h3>${app.name}</h3>
+          <p>${app.desc}</p>
+          <div class="meta">
+            <span class="badge ${app.live ? "live" : "repo"}">${app.live ? '<span class="live-dot"></span>Live' : "GitHub"}</span>
+            <span class="arrow">&rarr;</span>
+          </div>
+        `;
+        grid.appendChild(card);
+      }
+      root.appendChild(wrap);
     }
   </script>
 </body>
