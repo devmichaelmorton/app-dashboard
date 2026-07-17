@@ -135,6 +135,20 @@
     .card:hover .repolink { opacity: 1; }
     .repolink:hover { background: rgba(255,255,255,0.07); color: var(--text); }
 
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .chip {
+      font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 6px;
+      background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border);
+    }
+    .chip.db   { color: #fbbf24; border-color: rgba(251,191,36,0.30); background: rgba(251,191,36,0.08); }
+    .chip.host { color: var(--accent); border-color: rgba(110,168,254,0.30); background: var(--accent-soft); }
+    .note { font-size: 12px; color: var(--faint); margin-top: 10px; line-height: 1.4; }
+    .badge.st-live         { background: var(--ok-soft); color: var(--ok); }
+    .badge.st-ready        { background: var(--accent-soft); color: var(--accent); }
+    .badge.st-needs-db     { background: rgba(251,191,36,0.12); color: #fbbf24; }
+    .badge.st-needs-rework { background: rgba(248,113,113,0.12); color: #f87171; }
+    .badge.st-not-web      { background: rgba(255,255,255,0.05); color: var(--muted); }
+
     .search {
       width: 100%; margin-top: 18px;
       background: var(--card); border: 1px solid var(--border);
@@ -153,7 +167,7 @@
   <div class="wrap">
     <header>
       <h1>My Apps</h1>
-      <p class="subtitle">Quick launcher for my projects.</p>
+      <p class="subtitle">Launcher &amp; command center — every project, its status and stack.</p>
       <div class="stats">
         <span><span class="pip"></span><b id="liveCount">0</b> live</span>
         <span><b id="totalCount">0</b> total</span>
@@ -171,21 +185,23 @@
   <script>
     // Apps come from apps.json (the single source of truth). To add an app,
     // append one object there — no need to touch this file.
-    // Live apps float to the top; the rest group by type. Search filters everything.
-    const sections = [
-      { title: "Live",             color: "#4ade80", hint: "open these right now",             match: a => a.live },
-      { title: "Static sites",     color: "#6ea8fe", hint: "ready to deploy to Vercel",        match: a => !a.live && a.type === "static" },
-      { title: "Web apps",         color: "#c084fc", hint: "need a server / database to host", match: a => !a.live && a.type === "webapp" },
-      { title: "Scripts & engines",color: "#fbbf24", hint: "not a web app",                    match: a => !a.live && (a.type === "script" || !a.type) },
-    ];
+    // Cards group by STATUS (a pipeline view) and show stack + db + host chips.
+    const STATUS = {
+      "live":         { title: "Live",            color: "#4ade80", hint: "deployed & working" },
+      "ready":        { title: "Ready to deploy", color: "#6ea8fe", hint: "will work — just ship it" },
+      "needs-db":     { title: "Needs a database",color: "#fbbf24", hint: "deploys, but needs hosted Postgres" },
+      "needs-rework": { title: "Needs rework",    color: "#f87171", hint: "architecture change to host" },
+      "not-web":      { title: "Not a web app",   color: "#8a95ab", hint: "nothing to open" },
+    };
+    const ORDER = ["live", "ready", "needs-db", "needs-rework", "not-web"];
 
     const root = document.getElementById("sections");
     let apps = [];
 
     function render(query = "") {
       const q = query.trim().toLowerCase();
-      const visible = apps.filter(a =>
-        !q || a.name.toLowerCase().includes(q) || (a.desc || "").toLowerCase().includes(q) || (a.type || "").includes(q));
+      const visible = apps.filter(a => !q ||
+        [a.name, a.desc, a.stack, a.db, a.host, a.status].some(v => (v || "").toLowerCase().includes(q)));
       root.innerHTML = "";
 
       if (!visible.length) {
@@ -193,18 +209,19 @@
         return;
       }
 
-      for (const sec of sections) {
-        const items = visible.filter(sec.match);
+      for (const key of ORDER) {
+        const meta = STATUS[key];
+        const items = visible.filter(a => a.status === key);
         if (!items.length) continue;
 
         const wrap = document.createElement("section");
         wrap.className = "section";
         wrap.innerHTML = `
           <div class="section-head">
-            <span class="dot" style="background:${sec.color}"></span>
-            <h2>${sec.title}</h2>
+            <span class="dot" style="background:${meta.color}"></span>
+            <h2>${meta.title}</h2>
             <span class="count">${items.length}</span>
-            <span class="hint">${sec.hint}</span>
+            <span class="hint">${meta.hint}</span>
           </div>
           <div class="grid"></div>`;
         const grid = wrap.querySelector(".grid");
@@ -215,13 +232,21 @@
           card.href = app.url;
           card.target = "_blank";
           card.rel = "noopener";
+          const chips = [
+            app.stack ? `<span class="chip">${app.stack}</span>` : "",
+            app.db    ? `<span class="chip db">🗄 ${app.db}</span>` : "",
+            app.host  ? `<span class="chip host">${app.host}</span>` : "",
+          ].join("");
+          const label = app.live ? '<span class="live-dot"></span>Live' : (STATUS[app.status] || {}).title || app.status;
           card.innerHTML = `
-            ${app.live && app.repo ? `<a class="repolink" href="${app.repo}" target="_blank" rel="noopener" title="View source">&lt;/&gt; code</a>` : ""}
+            ${app.repo ? `<a class="repolink" href="${app.repo}" target="_blank" rel="noopener" title="View source">&lt;/&gt; code</a>` : ""}
             <div class="icon">${app.icon || "📦"}</div>
             <h3>${app.name}</h3>
             <p>${app.desc || ""}</p>
+            <div class="chips">${chips}</div>
+            ${app.note ? `<div class="note">${app.note}</div>` : ""}
             <div class="meta">
-              <span class="badge ${app.live ? "live" : "repo"}">${app.live ? '<span class="live-dot"></span>Live' : "GitHub"}</span>
+              <span class="badge st-${app.status}">${label}</span>
               <span class="arrow">&rarr;</span>
             </div>`;
           grid.appendChild(card);
@@ -233,7 +258,7 @@
     fetch("apps.json")
       .then(r => r.json())
       .then(data => {
-        apps = (data.apps || []).map(a => ({ ...a, url: a.site || a.repo, live: !!a.site }));
+        apps = (data.apps || []).map(a => ({ ...a, url: a.site || a.repo, live: a.status === "live" }));
         document.getElementById("totalCount").textContent = apps.length;
         document.getElementById("liveCount").textContent = apps.filter(a => a.live).length;
         render();
