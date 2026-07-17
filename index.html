@@ -149,8 +149,15 @@
     .badge.st-needs-rework { background: rgba(248,113,113,0.12); color: #f87171; }
     .badge.st-not-web      { background: rgba(255,255,255,0.05); color: var(--muted); }
 
+    .controls { display: flex; gap: 10px; align-items: center; margin-top: 16px; flex-wrap: wrap; }
+    .toggle { display: inline-flex; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 3px; gap: 2px; }
+    .toggle button {
+      background: none; border: none; color: var(--muted); font: inherit;
+      font-size: 13px; font-weight: 500; padding: 6px 13px; border-radius: 7px; cursor: pointer;
+    }
+    .toggle button.active { background: var(--accent-soft); color: var(--accent); }
     .search {
-      width: 100%; margin-top: 18px;
+      flex: 1; min-width: 200px;
       background: var(--card); border: 1px solid var(--border);
       border-radius: 12px; padding: 11px 14px;
       color: var(--text); font-size: 14.5px; outline: none;
@@ -159,6 +166,13 @@
     .search::placeholder { color: var(--faint); }
     .search:focus { border-color: var(--accent); }
     .empty { color: var(--faint); font-size: 14px; padding: 20px 2px; }
+    .chip.svc { color: #c084fc; border-color: rgba(192,132,252,0.30); background: rgba(192,132,252,0.08); }
+    .bom {
+      display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px;
+      padding-top: 10px; border-top: 1px solid var(--border);
+      font-size: 11.5px; color: var(--faint);
+    }
+    .bom b { color: var(--muted); font-weight: 500; }
     footer { margin-top: 50px; color: var(--faint); font-size: 12.5px; }
     footer a { color: var(--muted); }
   </style>
@@ -172,7 +186,13 @@
         <span><span class="pip"></span><b id="liveCount">0</b> live</span>
         <span><b id="totalCount">0</b> total</span>
       </div>
-      <input id="search" class="search" type="search" placeholder="Search apps…" autocomplete="off" />
+      <div class="controls">
+        <div class="toggle" id="groupToggle">
+          <button data-mode="status" class="active">By status</button>
+          <button data-mode="system">By system</button>
+        </div>
+        <input id="search" class="search" type="search" placeholder="Search apps, stacks, owners…" autocomplete="off" />
+      </div>
     </header>
 
     <div id="sections"></div>
@@ -183,9 +203,8 @@
   </div>
 
   <script>
-    // Apps come from apps.json (the single source of truth). To add an app,
-    // append one object there — no need to touch this file.
-    // Cards group by STATUS (a pipeline view) and show stack + db + host chips.
+    // Everything comes from apps.json (single source of truth). Each app is a
+    // "container card" with a bill of materials. Group By status OR By system.
     const STATUS = {
       "live":         { title: "Live",            color: "#4ade80", hint: "deployed & working" },
       "ready":        { title: "Ready to deploy", color: "#6ea8fe", hint: "will work — just ship it" },
@@ -193,49 +212,58 @@
       "needs-rework": { title: "Needs rework",    color: "#f87171", hint: "architecture change to host" },
       "not-web":      { title: "Not a web app",   color: "#8a95ab", hint: "nothing to open" },
     };
-    const ORDER = ["live", "ready", "needs-db", "needs-rework", "not-web"];
+    const STATUS_ORDER = ["live", "ready", "needs-db", "needs-rework", "not-web"];
+    const SYSTEM_COLORS = { "Personal": "#6ea8fe", "AnnoTag": "#4ade80", "Flecks": "#c084fc" };
 
     const root = document.getElementById("sections");
-    let apps = [];
+    let apps = [], systemsOrder = [], mode = "status", query = "";
 
-    function render(query = "") {
-      const q = query.trim().toLowerCase();
-      const visible = apps.filter(a => !q ||
-        [a.name, a.desc, a.stack, a.db, a.host, a.status].some(v => (v || "").toLowerCase().includes(q)));
-      root.innerHTML = "";
-
-      if (!visible.length) {
-        root.innerHTML = `<div class="empty">No apps match “${query}”.</div>`;
-        return;
+    function sectionsFor(list) {
+      if (mode === "status") {
+        return STATUS_ORDER.map(k => ({
+          title: STATUS[k].title, color: STATUS[k].color, hint: STATUS[k].hint,
+          items: list.filter(a => a.status === k),
+        }));
       }
+      const sys = systemsOrder.length ? systemsOrder : [...new Set(list.map(a => a.system || "Other"))];
+      return sys.map(s => {
+        const items = list.filter(a => (a.system || "Other") === s);
+        const owners = [...new Set(items.map(a => a.owner).filter(Boolean))];
+        return { title: s, color: SYSTEM_COLORS[s] || "#8a95ab", hint: owners.join(" · "), items };
+      });
+    }
 
-      for (const key of ORDER) {
-        const meta = STATUS[key];
-        const items = visible.filter(a => a.status === key);
-        if (!items.length) continue;
+    function render() {
+      const q = query.trim().toLowerCase();
+      const visible = apps.filter(a => !q || [a.name, a.desc, a.stack, a.db, a.host, a.status, a.system, a.owner, a.profile, (a.services || []).join(" ")]
+        .some(v => (v || "").toLowerCase().includes(q)));
+      root.innerHTML = "";
+      if (!visible.length) { root.innerHTML = `<div class="empty">No apps match “${query}”.</div>`; return; }
 
+      for (const sec of sectionsFor(visible)) {
+        if (!sec.items.length) continue;
         const wrap = document.createElement("section");
         wrap.className = "section";
         wrap.innerHTML = `
           <div class="section-head">
-            <span class="dot" style="background:${meta.color}"></span>
-            <h2>${meta.title}</h2>
-            <span class="count">${items.length}</span>
-            <span class="hint">${meta.hint}</span>
+            <span class="dot" style="background:${sec.color}"></span>
+            <h2>${sec.title}</h2>
+            <span class="count">${sec.items.length}</span>
+            <span class="hint">${sec.hint}</span>
           </div>
           <div class="grid"></div>`;
         const grid = wrap.querySelector(".grid");
 
-        for (const app of items) {
+        for (const app of sec.items) {
           const card = document.createElement("a");
           card.className = "card" + (app.live ? " live" : "");
-          card.href = app.url;
-          card.target = "_blank";
-          card.rel = "noopener";
+          card.href = app.url; card.target = "_blank"; card.rel = "noopener";
           const chips = [
-            app.stack ? `<span class="chip">${app.stack}</span>` : "",
-            app.db    ? `<span class="chip db">🗄 ${app.db}</span>` : "",
-            app.host  ? `<span class="chip host">${app.host}</span>` : "",
+            app.stack  ? `<span class="chip">${app.stack}</span>` : "",
+            app.db     ? `<span class="chip db">🗄 ${app.db}</span>` : "",
+            app.host   ? `<span class="chip host">${app.host}</span>` : "",
+            app.domain ? `<span class="chip host">${app.domain}</span>` : "",
+            ...(app.services || []).map(s => `<span class="chip svc">${s}</span>`),
           ].join("");
           const label = app.live ? '<span class="live-dot"></span>Live' : (STATUS[app.status] || {}).title || app.status;
           card.innerHTML = `
@@ -245,6 +273,11 @@
             <p>${app.desc || ""}</p>
             <div class="chips">${chips}</div>
             ${app.note ? `<div class="note">${app.note}</div>` : ""}
+            <div class="bom">
+              <span><b>system</b> ${app.system || "—"}</span>
+              <span><b>owner</b> ${app.owner || "—"}</span>
+              <span><b>profile</b> ${app.profile || "—"}</span>
+            </div>
             <div class="meta">
               <span class="badge st-${app.status}">${label}</span>
               <span class="arrow">&rarr;</span>
@@ -259,13 +292,20 @@
       .then(r => r.json())
       .then(data => {
         apps = (data.apps || []).map(a => ({ ...a, url: a.site || a.repo, live: a.status === "live" }));
+        systemsOrder = data.systems || [];
         document.getElementById("totalCount").textContent = apps.length;
         document.getElementById("liveCount").textContent = apps.filter(a => a.live).length;
         render();
       })
       .catch(err => { root.innerHTML = `<div class="empty">Couldn’t load apps.json — ${err}</div>`; });
 
-    document.getElementById("search").addEventListener("input", e => render(e.target.value));
+    document.getElementById("search").addEventListener("input", e => { query = e.target.value; render(); });
+    document.getElementById("groupToggle").addEventListener("click", e => {
+      const btn = e.target.closest("button"); if (!btn) return;
+      mode = btn.dataset.mode;
+      [...document.querySelectorAll("#groupToggle button")].forEach(b => b.classList.toggle("active", b === btn));
+      render();
+    });
   </script>
 </body>
 </html>
