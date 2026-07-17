@@ -135,6 +135,16 @@
     .card:hover .repolink { opacity: 1; }
     .repolink:hover { background: rgba(255,255,255,0.07); color: var(--text); }
 
+    .search {
+      width: 100%; margin-top: 18px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 11px 14px;
+      color: var(--text); font-size: 14.5px; outline: none;
+      transition: border-color 0.15s ease;
+    }
+    .search::placeholder { color: var(--faint); }
+    .search:focus { border-color: var(--accent); }
+    .empty { color: var(--faint); font-size: 14px; padding: 20px 2px; }
     footer { margin-top: 50px; color: var(--faint); font-size: 12.5px; }
     footer a { color: var(--muted); }
   </style>
@@ -148,6 +158,7 @@
         <span><span class="pip"></span><b id="liveCount">0</b> live</span>
         <span><b id="totalCount">0</b> total</span>
       </div>
+      <input id="search" class="search" type="search" placeholder="Search apps…" autocomplete="off" />
     </header>
 
     <div id="sections"></div>
@@ -158,82 +169,78 @@
   </div>
 
   <script>
-    // ── Edit this list to add / remove apps ─────────────────────────────
-    // repo  : GitHub source (private)
-    // site  : public URL of the deployed app. Add this when it goes live —
-    //         the card then opens the app, moves to the "Live" section,
-    //         and shows a green ✓ Live badge.
-    // type  : "static" (plain webpage) · "webapp" (needs a server/DB) · "script"
-    const gh = (r) => "https://github.com/devmichaelmorton/" + r;
-    const apps = [
-      { name: "AnnoTag",              icon: "🏷️", type: "webapp", repo: gh("annotag"),               site: "https://annotag.io",                              desc: "Tag any web page and re-find your notes — extension + annotag.io + accounts API." },
-      { name: "Atelier",              icon: "✍️", type: "webapp", repo: gh("atelier"),                                                                        desc: "Distraction-free novel-writing app — scenes, chapters, and worldbuilding." },
-      { name: "blueForge",            icon: "🔷", type: "static", repo: gh("blueForge"),             site: "https://blue-forge-sepia.vercel.app",             desc: "Tailwind-built landing / marketing site." },
-      { name: "Compass",              icon: "🧭", type: "static", repo: gh("compass"),                                                                        desc: "Master productivity app organized by Who / What / Where / When / Why / How." },
-      { name: "Contractor Calculator",icon: "🧮", type: "static", repo: gh("contractor-calculator"), site: "https://contractor-calculator-gamma.vercel.app",  desc: "Compare W-2 vs. contractor take-home pay." },
-      { name: "emagic",               icon: "✨", type: "static", repo: gh("emagic"),                site: "https://emagic-ashy.vercel.app",                  desc: "Emagic marketing site (has a PHP contact form)." },
-      { name: "Expense Manager",      icon: "💵", type: "webapp", repo: gh("expense-manager"),                                                                desc: "Spreadsheet-style expense tracker split by business entity." },
-      { name: "Flecks Capital",       icon: "💹", type: "webapp", repo: gh("flecks-capital"),                                                                 desc: "Gap-trading research & strategy dashboard." },
-      { name: "Gap Bot",              icon: "🤖", type: "script", repo: gh("gap-bot"),                                                                        desc: "Python engine researching the gap-fill options edge on SPY / QQQ." },
-      { name: "GigaHuman",            icon: "🌱", type: "webapp", repo: gh("gigahuman"),                                                                      desc: "Life-inventory app scoring every area of your life 1–10." },
-      { name: "MBA Library",          icon: "🎓", type: "webapp", repo: gh("mba-library"),                                                                    desc: "Personal reference library of MBA frameworks, organized by class." },
-      { name: "Mortonomics",          icon: "📊", type: "static", repo: gh("mortonomics"),           site: "https://mortonomics.vercel.app",                  desc: "Mortonomics — personal site." },
-      { name: "PEG Ratio Comparison", icon: "📈", type: "static", repo: gh("peg-ratio-calculator"),  site: "https://peg-ratio-calculator-phi.vercel.app",     desc: "Compare whether stocks' growth justifies their P/E." },
-      { name: "Recipe Manager",       icon: "🍳", type: "webapp", repo: gh("recipe-manager"),                                                                 desc: "Save and organize recipes, seeded from a Notion export." },
-      { name: "Scripture Study",      icon: "📖", type: "webapp", repo: gh("scripture-study"),                                                                desc: "Scripture study + worldbuilder for the Standard Works." },
-      { name: "Utah Characters",      icon: "🎭", type: "static", repo: gh("utahcharacters"),                                                                 desc: "Utah Characters — site with a PHP contact form." },
-    ].map(a => ({ ...a, url: a.site || a.repo, live: !!a.site }));
-
-    // ── Section layout ──────────────────────────────────────────────────
-    // Live apps float to the top (any type). The rest group by what they are.
+    // Apps come from apps.json (the single source of truth). To add an app,
+    // append one object there — no need to touch this file.
+    // Live apps float to the top; the rest group by type. Search filters everything.
     const sections = [
-      { key: "live",   title: "Live",         color: "#4ade80", hint: "open these right now",          match: a => a.live },
-      { key: "static", title: "Static sites", color: "#6ea8fe", hint: "ready to deploy to Vercel",     match: a => !a.live && a.type === "static" },
-      { key: "webapp", title: "Web apps",     color: "#c084fc", hint: "need a server / database to host", match: a => !a.live && a.type === "webapp" },
-      { key: "script", title: "Scripts & engines", color: "#fbbf24", hint: "not a web app",            match: a => !a.live && a.type === "script" },
+      { title: "Live",             color: "#4ade80", hint: "open these right now",             match: a => a.live },
+      { title: "Static sites",     color: "#6ea8fe", hint: "ready to deploy to Vercel",        match: a => !a.live && a.type === "static" },
+      { title: "Web apps",         color: "#c084fc", hint: "need a server / database to host", match: a => !a.live && a.type === "webapp" },
+      { title: "Scripts & engines",color: "#fbbf24", hint: "not a web app",                    match: a => !a.live && (a.type === "script" || !a.type) },
     ];
 
     const root = document.getElementById("sections");
-    document.getElementById("totalCount").textContent = apps.length;
-    document.getElementById("liveCount").textContent = apps.filter(a => a.live).length;
+    let apps = [];
 
-    for (const sec of sections) {
-      const items = apps.filter(sec.match);
-      if (!items.length) continue;
+    function render(query = "") {
+      const q = query.trim().toLowerCase();
+      const visible = apps.filter(a =>
+        !q || a.name.toLowerCase().includes(q) || (a.desc || "").toLowerCase().includes(q) || (a.type || "").includes(q));
+      root.innerHTML = "";
 
-      const wrap = document.createElement("section");
-      wrap.className = "section";
-      wrap.innerHTML = `
-        <div class="section-head">
-          <span class="dot" style="background:${sec.color}"></span>
-          <h2>${sec.title}</h2>
-          <span class="count">${items.length}</span>
-          <span class="hint">${sec.hint}</span>
-        </div>
-        <div class="grid"></div>
-      `;
-      const grid = wrap.querySelector(".grid");
-
-      for (const app of items) {
-        const card = document.createElement("a");
-        card.className = "card" + (app.live ? " live" : "");
-        card.href = app.url;
-        card.target = "_blank";
-        card.rel = "noopener";
-        card.innerHTML = `
-          ${app.live ? `<a class="repolink" href="${app.repo}" target="_blank" rel="noopener" title="View source">&lt;/&gt; code</a>` : ""}
-          <div class="icon">${app.icon}</div>
-          <h3>${app.name}</h3>
-          <p>${app.desc}</p>
-          <div class="meta">
-            <span class="badge ${app.live ? "live" : "repo"}">${app.live ? '<span class="live-dot"></span>Live' : "GitHub"}</span>
-            <span class="arrow">&rarr;</span>
-          </div>
-        `;
-        grid.appendChild(card);
+      if (!visible.length) {
+        root.innerHTML = `<div class="empty">No apps match “${query}”.</div>`;
+        return;
       }
-      root.appendChild(wrap);
+
+      for (const sec of sections) {
+        const items = visible.filter(sec.match);
+        if (!items.length) continue;
+
+        const wrap = document.createElement("section");
+        wrap.className = "section";
+        wrap.innerHTML = `
+          <div class="section-head">
+            <span class="dot" style="background:${sec.color}"></span>
+            <h2>${sec.title}</h2>
+            <span class="count">${items.length}</span>
+            <span class="hint">${sec.hint}</span>
+          </div>
+          <div class="grid"></div>`;
+        const grid = wrap.querySelector(".grid");
+
+        for (const app of items) {
+          const card = document.createElement("a");
+          card.className = "card" + (app.live ? " live" : "");
+          card.href = app.url;
+          card.target = "_blank";
+          card.rel = "noopener";
+          card.innerHTML = `
+            ${app.live && app.repo ? `<a class="repolink" href="${app.repo}" target="_blank" rel="noopener" title="View source">&lt;/&gt; code</a>` : ""}
+            <div class="icon">${app.icon || "📦"}</div>
+            <h3>${app.name}</h3>
+            <p>${app.desc || ""}</p>
+            <div class="meta">
+              <span class="badge ${app.live ? "live" : "repo"}">${app.live ? '<span class="live-dot"></span>Live' : "GitHub"}</span>
+              <span class="arrow">&rarr;</span>
+            </div>`;
+          grid.appendChild(card);
+        }
+        root.appendChild(wrap);
+      }
     }
+
+    fetch("apps.json")
+      .then(r => r.json())
+      .then(data => {
+        apps = (data.apps || []).map(a => ({ ...a, url: a.site || a.repo, live: !!a.site }));
+        document.getElementById("totalCount").textContent = apps.length;
+        document.getElementById("liveCount").textContent = apps.filter(a => a.live).length;
+        render();
+      })
+      .catch(err => { root.innerHTML = `<div class="empty">Couldn’t load apps.json — ${err}</div>`; });
+
+    document.getElementById("search").addEventListener("input", e => render(e.target.value));
   </script>
 </body>
 </html>
