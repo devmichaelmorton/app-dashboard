@@ -13,8 +13,8 @@ export default async function Home() {
   const access = await getAccess(); // one call per request; cards get booleans
 
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-10">
-      <h1 className="mb-8 text-2xl font-semibold tracking-tight">Overview</h1>
+    <main className="mx-auto w-full max-w-[1160px] flex-1 px-6 py-10">
+      <h1 className="mb-8 text-[22px] font-semibold tracking-tight">Overview</h1>
 
       {/* Products — the sellable apps */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -29,9 +29,9 @@ export default async function Home() {
 
         {/* Suite teaser — one login for everything (billing comes later) */}
         <div className="flex flex-col rounded-xl border border-dashed border-border p-5">
-          <Boxes className="mb-4 size-6 text-muted-foreground" strokeWidth={1.5} />
-          <h3 className="text-[15px] font-semibold leading-snug">The Suite</h3>
-          <p className="mt-1 flex-1 text-sm leading-relaxed text-muted-foreground">
+          <Boxes className="mb-4 size-6 text-foreground/70" strokeWidth={1.5} />
+          <h3 className="text-base font-semibold leading-snug">The Suite</h3>
+          <p className="mt-1.5 flex-1 text-[13px] leading-relaxed text-muted-foreground">
             Every app, one account, one plan. Same login everywhere.
           </p>
           <div className="mt-4">
@@ -45,11 +45,11 @@ export default async function Home() {
       {/* Workshop — free things, no locks, no account needed */}
       <section className="mt-12">
         <div className="overflow-hidden rounded-xl border border-border bg-card">
-          <div className="flex items-center justify-between border-b border-border px-5 py-3">
-            <span className="text-xs font-medium text-muted-foreground">
+          <div className="flex items-center justify-between border-b border-border bg-background px-5 py-3">
+            <span className="text-[13px] text-muted-foreground">
               From the workshop
             </span>
-            <span className="text-xs text-muted-foreground">Free to use</span>
+            <span className="text-[13px] text-muted-foreground">Free to use</span>
           </div>
           <ul className="divide-y divide-border">
             {showcase.map((item) => (
@@ -74,7 +74,7 @@ export default async function Home() {
               </li>
             ))}
           </ul>
-          <div className="flex items-center justify-between border-t border-border px-5 py-3">
+          <div className="flex items-center justify-between border-t border-border bg-background px-5 py-3">
             <span className="text-xs text-muted-foreground">
               Built by Michael Morton
             </span>

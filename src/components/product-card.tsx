@@ -29,14 +29,14 @@ export function ProductCard({
         featured
           ? {
               backgroundImage:
-                "radial-gradient(120% 90% at 0% 0%, rgba(255,255,255,0.05), transparent 55%)",
+                "radial-gradient(120% 90% at 0% 0%, rgba(99, 91, 255, 0.13), transparent 55%)",
             }
           : undefined
       }
     >
-      <Icon className="mb-4 size-6 text-muted-foreground" strokeWidth={1.5} />
-      <h3 className="text-[15px] font-semibold leading-snug">{product.name}</h3>
-      <p className="mt-1 flex-1 text-sm leading-relaxed text-muted-foreground">
+      <Icon className="mb-4 size-6 text-foreground/70" strokeWidth={1.5} />
+      <h3 className="text-base font-semibold leading-snug">{product.name}</h3>
+      <p className="mt-1.5 flex-1 text-[13px] leading-relaxed text-muted-foreground">
         {product.blurb}
       </p>
       <div className="mt-4">
