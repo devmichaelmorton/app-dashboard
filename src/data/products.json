@@ -1,0 +1,49 @@
+{
+  "_comment": "EVERYTHING IN THIS FILE IS PUBLIC — it renders on the storefront for anonymous visitors. Marketing copy only: no repos, no infra notes, no internal status. The private 16-app inventory lives in src/data/inventory.json (a later slice). Slugs are FROZEN (see README): recipes, expenses, scripture, gigahuman.",
+  "products": [
+    {
+      "slug": "recipes",
+      "name": "Recipes Manager",
+      "icon": "chef-hat",
+      "tagline": "Your family cookbook, online",
+      "blurb": "Save and cook from your own collection — photos, tags, and the family classics in one place.",
+      "url": null,
+      "state": "live"
+    },
+    {
+      "slug": "expenses",
+      "name": "Expense Manager",
+      "icon": "wallet",
+      "tagline": "Know where the money goes",
+      "blurb": "Spreadsheet-fast expense entry, organized by business and category.",
+      "url": null,
+      "state": "soon"
+    }
+  ],
+  "showcase": [
+    {
+      "name": "blueForge",
+      "icon": "🔷",
+      "url": "https://blue-forge-sepia.vercel.app",
+      "blurb": "Tailwind-built marketing site"
+    },
+    {
+      "name": "Mortonomics",
+      "icon": "📊",
+      "url": "https://mortonomics.vercel.app",
+      "blurb": "Personal finance site"
+    },
+    {
+      "name": "PEG Ratio Comparison",
+      "icon": "📈",
+      "url": "https://peg-ratio-calculator-phi.vercel.app",
+      "blurb": "Compare stock valuations with live market data"
+    },
+    {
+      "name": "Contractor Calculator",
+      "icon": "🧮",
+      "url": "https://contractor-calculator-gamma.vercel.app",
+      "blurb": "Quick contractor pricing math"
+    }
+  ]
+}

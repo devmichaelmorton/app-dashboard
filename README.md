@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# app-dashboard
 
-## Getting Started
+The public storefront + hub for the app suite. Anyone can browse; apps unlock
+per-account. One shared Clerk instance across every app = same login everywhere.
 
-First, run the development server:
+## The rules (read before changing anything)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+1. **Slugs are FROZEN.** One lowercase word per product, forever:
+   `recipes`, `expenses`, `scripture`, `gigahuman`.
+   Renaming a slug silently orphans every access grant already written to
+   users' metadata. Never name a slug after a repo.
+2. **`src/data/products.json` is PUBLIC** — marketing copy only.
+   **`src/data/inventory.json` is PRIVATE** (owner-only, later slice).
+   Moving an app between them is a deliberate act, not a filter.
+3. **Apps check access, not purchases.** Everything entitlement-related lives
+   in `src/lib/access.ts`. When billing arrives, ONE marked line in that file
+   changes — nothing else, ever.
+
+## How to grant someone access (until billing exists)
+
+Clerk Dashboard → Users → pick the user → Metadata → **Public** → edit:
+
+```json
+{ "apps": ["recipes"] }
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Saves instantly; they get the "Open app" button on next page load.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Env vars (3, no database)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` / `CLERK_SECRET_KEY` — must be IDENTICAL
+  to recipes-manager's (same keys = same shared login).
+- `OWNER_USER_ID` — Michael's Clerk user id; gates the private /inventory view.
 
-## Learn More
+## Notes
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `middleware.ts` prints a deprecation warning on every build — cosmetic.
+  Never create `proxy.ts` alongside it (hard build error).
+- The hub's lock is storefront credibility, NOT security. Each app must gate
+  its own data with its own copy of `access.ts`.
+- Dev: `npm run dev` (launch.json entry `app-dashboard-dev`, port 3006).
