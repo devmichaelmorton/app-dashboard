@@ -20,19 +20,13 @@ export function ProductCard({
   signedIn: boolean;
 }) {
   const Icon = ICONS[product.icon] ?? Package;
-  const featured = owns; // owned apps get the subtle "congratulations" glow
+  const featured = owns; // owned apps get the subtle accent glow (see .featured-glow)
 
   return (
     <div
-      className="relative flex flex-col rounded-xl border border-border bg-card p-5"
-      style={
-        featured
-          ? {
-              backgroundImage:
-                "radial-gradient(120% 90% at 0% 0%, rgba(99, 91, 255, 0.13), transparent 55%)",
-            }
-          : undefined
-      }
+      className={`relative flex flex-col rounded-xl border border-border bg-card p-5 ${
+        featured ? "featured-glow" : ""
+      }`}
     >
       <Icon className="mb-4 size-6 text-foreground/70" strokeWidth={1.5} />
       <h3 className="text-base font-semibold leading-snug">{product.name}</h3>
