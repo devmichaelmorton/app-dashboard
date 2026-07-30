@@ -7,7 +7,7 @@
       "icon": "chef-hat",
       "tagline": "Your family cookbook, online",
       "blurb": "Save and cook from your own collection — photos, tags, and the family classics in one place.",
-      "url": null,
+      "url": "https://recipes-manager-steel.vercel.app",
       "state": "live"
     },
     {
@@ -44,6 +44,18 @@
       "icon": "🧮",
       "url": "https://contractor-calculator-gamma.vercel.app",
       "blurb": "Quick contractor pricing math"
+    },
+    {
+      "name": "Scripture Timeline",
+      "icon": "📜",
+      "url": "https://scripture-timeline.vercel.app",
+      "blurb": "Old Testament timeline on a real years axis"
+    },
+    {
+      "name": "Emagic",
+      "icon": "✨",
+      "url": "https://emagic-ashy.vercel.app",
+      "blurb": "Marketing site"
     }
   ]
 }
